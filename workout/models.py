@@ -11,16 +11,22 @@ class WorkoutMaster(models.Model):
     """
 
     WORKOUT_TYPES = (
-        ("WEIGHT LIFTING", "WEIGHTS"),
+        ("WEIGHT LIFTING", "WEIGHT LIFTING"),
         ("CARDIO", "CARDIO"),
     )
 
     name = models.CharField(_("Workout Name"), max_length=256)
     workout_type = models.CharField(
-        _("Workout Type"), max_length=256, choices=WORKOUT_TYPES, default="WEIGHTS"
+        _("Workout Type"),
+        max_length=256,
+        choices=WORKOUT_TYPES,
+        default="WEIGHT LIFTING",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class ProgramMaster(models.Model):
@@ -29,7 +35,7 @@ class ProgramMaster(models.Model):
     """
 
     name = models.CharField(_("Program Name"), max_length=256)
-    workouts = models.ManyToManyField(WorkoutMaster, related_name="workouts")
+    workouts = models.ManyToManyField(WorkoutMaster, related_name="program_workouts")
     start_date = models.DateField(_("Program Start Date"), default=datetime.now)
     end_date = models.DateField(_("Program End Date"), null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -75,3 +81,29 @@ class WeightedWorkoutLogMaster(models.Model):
     calories = models.CharField(
         _("Calories Burned"), max_length=256, blank=True, null=True
     )
+
+    def __str__(self) -> str:
+        return f"{self.workout.name} on {self.date_time.strftime('%m/%d/%Y, %H:%M:%S')}"
+
+
+class CardioWorkoutLogMaster(models.Model):
+    """
+    Logging the Workouts with their details.
+    Cardio Workouts.
+    """
+
+    WEIGHT_METRIC = (
+        ("Kilo Grams", "KG"),
+        ("Pounds", "LBS"),
+    )
+
+    workout = models.ForeignKey(WorkoutMaster, on_delete=models.CASCADE)
+    date_time = models.DateTimeField(_("Cardio Date"), default=datetime.now)
+    laps = models.PositiveIntegerField(_("Cardio Laps"))
+    distance = models.PositiveBigIntegerField(_("Distance Covered (Km)"))
+    calories = models.CharField(
+        _("Calories Burned"), max_length=256, blank=True, null=True
+    )
+
+    def __str__(self) -> str:
+        return f"{self.workout.name} on {self.date_time.strftime('%m/%d/%Y, %H:%M:%S')}"
